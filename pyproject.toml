@@ -1,0 +1,22 @@
+[project]
+name = "bluecatgh"
+version = "0.1.0"
+description = "CPE 586 Homework 0 Python package"
+readme = "README.md"
+authors = [
+    { name = "bluecatgh", email = "bluecat5452@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.maturin]
+module-name = "bluecat._core"
+python-packages = ["bluecat"]
+python-source = "src"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*.rs" }, { file = "Cargo.toml" }, { file = "Cargo.lock" }]
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
