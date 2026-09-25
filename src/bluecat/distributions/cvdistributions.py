@@ -21,3 +21,22 @@ def exponentialdist(lam: float) -> float:
         y = uniform()
 
     return -(1.0 / lam) * math.log(y)
+
+
+def poissondist(lam: float) -> int:
+    """Cryptographically secure Poisson-distributed sample."""
+    if lam <= 0:
+        raise ValueError("lambda must be greater than 0")
+
+    u = uniform()
+
+    k = 0
+    probability = math.exp(-lam)
+    cumulative = probability
+
+    while u > cumulative:
+        k += 1
+        probability *= lam / k
+        cumulative += probability
+
+    return k
