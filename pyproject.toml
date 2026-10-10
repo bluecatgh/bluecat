@@ -1,6 +1,6 @@
 [project]
 name = "bluecatgh"
-version = "0.2.0"
+version = "0.3.0"
 description = "CPE 586 Homework 0 Python package"
 readme = "README.md"
 authors = [
@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
     "torch>=2.14.0",
 ]
 
