@@ -191,3 +191,93 @@ class LinearRegression(nn.Module):
 
         plt.tight_layout()
         plt.show()
+
+
+class CauchyRegression(nn.Module):
+
+    def __init__(self, input_dim, c=1.0):
+        super().__init__()
+
+        self.linear = nn.Linear(
+            input_dim, 1, dtype=torch.float64
+        )
+        self.c = c
+        self.loss_history = []
+
+    def forward(self, X):
+        return self.linear(X)
+
+    def cauchy_loss(self, y_pred, y_true):
+        residual = (y_true - y_pred) / self.c
+
+        loss = (self.c**2 / 2) * torch.log1p(
+            residual**2
+        )
+        return torch.mean(loss)
+
+    def fit(self, X, y, learning_rate=1.0, epochs=3000):
+
+        X = torch.tensor(X, dtype=torch.float64)
+        y = torch.tensor(
+            y.reshape(-1, 1), dtype=torch.float64
+        )
+
+        # Standardize input features
+        self.X_mean = X.mean(dim=0)
+        self.X_std = X.std(dim=0, unbiased=False)
+        X_scaled = (X - self.X_mean) / self.X_std
+
+        # Initialize parameters
+        with torch.no_grad():
+            self.linear.weight.zero_()
+            self.linear.bias.fill_(y.mean().item())
+
+        # Optimizer
+        optimizer = torch.optim.SGD(
+            self.parameters(), lr=learning_rate
+        )
+
+        self.loss_history = []
+
+        # Training loop
+        for epoch in range(epochs):
+
+            y_pred = self.forward(X_scaled)
+            loss = self.cauchy_loss(y_pred, y)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            self.loss_history.append(loss.item())
+
+            if (epoch + 1) % 500 == 0:
+                print(
+                    f"Epoch {epoch+1}/{epochs}, "
+                    f"Loss: {loss.item():.6f}"
+                )
+
+        with torch.no_grad():
+            self.final_loss = self.cauchy_loss(
+                self.forward(X_scaled), y
+            ).item()
+
+        return self
+
+    def predict(self, X):
+
+        X = torch.tensor(X, dtype=torch.float64)
+        X_scaled = (X - self.X_mean) / self.X_std
+
+        with torch.no_grad():
+            return self.forward(X_scaled).numpy().flatten()
+
+    def get_coefficients(self):
+
+        with torch.no_grad():
+            w = self.linear.weight.flatten() / self.X_std
+            w0 = self.linear.bias.item() - torch.dot(
+                w, self.X_mean
+            ).item()
+
+        return w0, w.numpy()
